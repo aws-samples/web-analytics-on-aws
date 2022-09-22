@@ -33,57 +33,18 @@ class FirehoseStack(Stack):
       default='PUT-S3-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
     )
 
-    FIREHOSE_BUFFER_SIZE = cdk.CfnParameter(self, 'FirehoseBufferSize',
-      type='Number',
-      description='kinesis data firehose buffer size',
-      min_value=1,
-      max_value=128,
-      default=128
-    )
+    firehose_config = self.node.try_get_context('firehose')
 
-    FIREHOSE_BUFFER_INTERVAL = cdk.CfnParameter(self, 'FirehoseBufferInterval',
-      type='Number',
-      description='kinesis data firehose buffer interval',
-      min_value=60,
-      max_value=300,
-      default=60
-    )
+    FIREHOSE_BUFFER_SIZE = firehose_config['buffer_size_in_mbs']
+    FIREHOSE_BUFFER_INTERVAL = firehose_config['buffer_interval_in_seconds']
+    FIREHOSE_LAMBDA_BUFFER_SIZE = firehose_config['lambda_buffer_size_in_mbs']
+    FIREHOSE_LAMBDA_BUFFER_INTERVAL = firehose_config['lambda_buffer_interval_in_seconds']
+    FIREHOSE_LAMBDA_NUMBER_OF_RETRIES = firehose_config['lambda_number_of_retries']
+    FIREHOSE_TO_S3_PREFIX = firehose_config['prefix']
+    FIREHOSE_TO_S3_ERROR_OUTPUT_PREFIX = firehose_config['error_output_prefix']
+    FIREHOSE_TO_S3_OUTPUT_FOLDER = firehose_config['s3_output_folder']
 
-    FIREHOSE_LAMBDA_BUFFER_SIZE = cdk.CfnParameter(self, 'FirehoseLambdaBufferSize',
-      type='Number',
-      description='kinesis data firehose buffer size for AWS Lambda to transform records',
-      min_value=1,
-      max_value=3,
-      default=3
-    )
-
-    FIREHOSE_LAMBDA_BUFFER_INTERVAL = cdk.CfnParameter(self, 'FirehoseLambdaBufferInterval',
-      type='Number',
-      description='kinesis data firehose buffer interval for AWS Lambda to transform records',
-      min_value=60,
-      max_value=900,
-      default=300
-    )
-
-    FIREHOSE_LAMBDA_NUMBER_OF_RETRIES = cdk.CfnParameter(self, 'FirehoseLambdaNumberOfRetries',
-      type='Number',
-      description='Number of retries for AWS Lambda to transform records in kinesis data firehose',
-      min_value=1,
-      max_value=5,
-      default=3
-    )
-
-    FIREHOSE_TO_S3_PREFIX = cdk.CfnParameter(self, 'FirehosePrefix',
-      type='String',
-      description='kinesis data firehose S3 prefix',
-      default='json-data/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
-    )
-
-    FIREHOSE_TO_S3_ERROR_OUTPUT_PREFIX = cdk.CfnParameter(self, 'FirehoseErrorOutputPrefix',
-      type='String',
-      description='kinesis data firehose S3 error output prefix',
-      default='error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}'
-    )
+    assert f'{FIREHOSE_TO_S3_OUTPUT_FOLDER}/' == FIREHOSE_TO_S3_PREFIX[:len(FIREHOSE_TO_S3_OUTPUT_FOLDER) + 1]
 
     firehose_role_policy_doc = aws_iam.PolicyDocument()
     firehose_role_policy_doc.add_statements(aws_iam.PolicyStatement(**{
@@ -169,7 +130,7 @@ class FirehoseStack(Stack):
         ),
         cfn.ProcessorParameterProperty(
           parameter_name="NumberOfRetries",
-          parameter_value=FIREHOSE_LAMBDA_NUMBER_OF_RETRIES.value_as_string
+          parameter_value=str(FIREHOSE_LAMBDA_NUMBER_OF_RETRIES)
         ),
         cfn.ProcessorParameterProperty(
           parameter_name="RoleArn",
@@ -177,11 +138,11 @@ class FirehoseStack(Stack):
         ),
         cfn.ProcessorParameterProperty(
           parameter_name="BufferSizeInMBs",
-          parameter_value=FIREHOSE_LAMBDA_BUFFER_SIZE.value_as_string
+          parameter_value=str(FIREHOSE_LAMBDA_BUFFER_SIZE)
         ),
         cfn.ProcessorParameterProperty(
           parameter_name="BufferIntervalInSeconds",
-          parameter_value=FIREHOSE_LAMBDA_BUFFER_INTERVAL.value_as_string
+          parameter_value=str(FIREHOSE_LAMBDA_BUFFER_INTERVAL)
         )
       ]
     )
@@ -197,8 +158,8 @@ class FirehoseStack(Stack):
       bucket_arn=s3_bucket.bucket_arn,
       role_arn=firehose_role.role_arn,
       buffering_hints={
-        "intervalInSeconds": FIREHOSE_BUFFER_INTERVAL.value_as_number,
-        "sizeInMBs": FIREHOSE_BUFFER_SIZE.value_as_number
+        "intervalInSeconds": FIREHOSE_BUFFER_INTERVAL,
+        "sizeInMBs": FIREHOSE_BUFFER_SIZE
       },
       cloud_watch_logging_options={
         "enabled": True,
@@ -212,8 +173,8 @@ class FirehoseStack(Stack):
       dynamic_partitioning_configuration={
         "enabled": False
       },
-      error_output_prefix=FIREHOSE_TO_S3_ERROR_OUTPUT_PREFIX.value_as_string,
-      prefix=FIREHOSE_TO_S3_PREFIX.value_as_string,
+      error_output_prefix=FIREHOSE_TO_S3_ERROR_OUTPUT_PREFIX,
+      prefix=FIREHOSE_TO_S3_PREFIX,
       processing_configuration=firehose_processing_config
     )
 
@@ -228,7 +189,9 @@ class FirehoseStack(Stack):
     )
 
     self.s3_dest_bucket_name = s3_bucket.bucket_name
+    self.s3_dest_folder_name = FIREHOSE_TO_S3_OUTPUT_FOLDER
 
     cdk.CfnOutput(self, '{}_S3DestBucket'.format(self.stack_name), value=s3_bucket.bucket_name, export_name='S3DestBucket')
-    cdk.CfnOutput(self, '{}_KinesisDataFirehoseName'.format(self.stack_name), value=firehose_to_s3_delivery_stream.delivery_stream_name, export_name='KinesisDataFirehoseName')
+    cdk.CfnOutput(self, '{}_KinesisDataFirehoseName'.format(self.stack_name),
+      value=firehose_to_s3_delivery_stream.delivery_stream_name, export_name='KinesisDataFirehoseName')
 

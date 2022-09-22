@@ -42,6 +42,8 @@ class FirehoseDataTransformLambdaStack(Stack):
       description="Check if records have valid schema",
       code=aws_lambda.Code.from_asset('./src/main/python/SchemaValidator'),
       timeout=cdk.Duration.minutes(5),
+      #XXX: set memory size appropriately
+      memory_size=256,
       layers=[lambda_lib_layer]
     )
 
@@ -56,4 +58,8 @@ class FirehoseDataTransformLambdaStack(Stack):
     log_group.grant_write(schema_validator_lambda_fn)
 
     self.schema_validator_lambda_fn = schema_validator_lambda_fn
+
+    cdk.CfnOutput(self, f'{self.stack_name}_FirehoseDataTransformFuncName',
+      value=self.schema_validator_lambda_fn.function_name,
+      export_name='FirehoseDataTransformFuncName')
 

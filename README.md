@@ -68,7 +68,6 @@ At this point you can now synthesize the CloudFormation template for this code.
 (.venv) $ cdk synth --all \
               --parameters KinesisStreamName='your-kinesis-data-stream-name' \
               --parameters FirehoseStreamName='your-delivery-stream-name' \
-              --parameters FirehosePrefix='your-s3-bucket-prefix' \
               --parameters LambdaLayerCodeS3BucketName=<i>'your-s3-bucket-name-for-lambda-layer-code'</i> \
               --parameters LambdaLayerCodeS3ObjectKey=<i>'your-s3-object-key-for-lambda-layer-code'</i>
 </pre>
@@ -79,7 +78,6 @@ Use `cdk deploy` command to create the stack shown above.
 (.venv) $ cdk deploy --require-approval never --all \
               --parameters KinesisStreamName='your-kinesis-data-stream-name' \
               --parameters FirehoseStreamName='your-delivery-stream-name' \
-              --parameters FirehosePrefix='your-s3-bucket-prefix' \
               --parameters LambdaLayerCodeS3BucketName=<i>'your-s3-bucket-name-for-lambda-layer-code'</i> \
               --parameters LambdaLayerCodeS3ObjectKey=<i>'your-s3-object-key-for-lambda-layer-code'</i>
 </pre>

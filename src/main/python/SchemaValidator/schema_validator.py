@@ -6,6 +6,7 @@ import base64
 import json
 import logging
 import collections
+from datetime import datetime
 
 import fastavro
 
@@ -53,7 +54,10 @@ ORIGINAL_SCHEMA = {
     },
     {
       'name': 'timestamp',
-      'type': 'string'
+      'type': {
+        'type': 'string',
+        'logicalType': 'datetime'
+      }
     },
     {
       'name': 'uri',
@@ -61,6 +65,24 @@ ORIGINAL_SCHEMA = {
     }
   ]
 }
+
+
+def read_datetime(data, writer_schema=None, reader_schema=None):
+  return datetime.strptime(data, '%Y-%m-%dT%H:%M:%SZ')
+
+def prepare_datetime(data, schema):
+  """Converts datetime.datetime to string representing the date and time"""
+  if isinstance(data, datetime):
+    return datetime.strftime('%Y-%m-%dT%H:%M:%SZ')
+  else:
+    try:
+      dt = datetime.strptime(data, '%Y-%m-%dT%H:%M:%SZ')
+      return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    except Exception as ex:
+      return None
+
+fastavro.read.LOGICAL_READERS["string-datetime"] = read_datetime
+fastavro.write.LOGICAL_WRITERS["string-datetime"] = prepare_datetime
 
 PARSED_SCHEMA = fastavro.parse_schema(ORIGINAL_SCHEMA)
 
@@ -142,18 +164,6 @@ if __name__ == '__main__':
       "uri": "https://phones.madrid/2012/02/12/bed-federal-in-wireless-scientists-shoes-walker-those-premier-younger?lane=outcomes&acc=memories"
     },
     {
-      # missing required data
-      # "userId": "045e63c7-b276-4117-9706-7c2e3b87d5f5",
-      "sessionId": "abfd47eb7dd7b8aeec0555a7",
-      "referrer": "transfer.edu",
-      "userAgent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 9.50",
-      "ip": "170.128.148.234",
-      "hostname": "propecia.tc",
-      "os": "Lubuntu",
-      "timestamp": "2022-09-16T07:46:04Z",
-      "uri": "https://pee.cloud/2019/06/15/alan-publish-perl-snow-notification-gap-improvement-guaranteed-changed-determining?casino=admissions&cottage=hotel"
-    },
-    {
       "userId": "70b1f606-aa63-47fb-bc92-76de9c59d064",
       "sessionId": "928e78473db8449b17644b2c",
       # missing optional data
@@ -166,12 +176,36 @@ if __name__ == '__main__':
       "uri": "https://aaa.gov/2022/04/29/cialis-prayer-presentations-completed-avenue-vision?trucks=cut&indeed=members"
     },
     {
+      "userId": "897bef5f-294d-4ecc-a3b6-ef2844958720",
+      "sessionId": "a5aa20a72c9e37588f9bbeaa",
+      "referrer": "brandon.biz",
+      "userAgent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.52",
+      "ip": "202.165.71.49",
+      "hostname": "toxic.tokyo",
+      "os": "openSUSE",
+      # invalid datetime format
+      "timestamp": "2022-09-16 07:35:46",
+      "uri": "https://phones.madrid/2012/02/12/bed-federal-in-wireless-scientists-shoes-walker-those-premier-younger?lane=outcomes&acc=memories"
+    },
+    {
+      # missing required data
+      # "userId": "045e63c7-b276-4117-9706-7c2e3b87d5f5",
+      "sessionId": "abfd47eb7dd7b8aeec0555a7",
+      "referrer": "transfer.edu",
+      "userAgent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 9.50",
+      "ip": "170.128.148.234",
+      "hostname": "propecia.tc",
+      "os": "Lubuntu",
+      "timestamp": "2022-09-16T07:46:04Z",
+      "uri": "https://pee.cloud/2019/06/15/alan-publish-perl-snow-notification-gap-improvement-guaranteed-changed-determining?casino=admissions&cottage=hotel"
+    },
+    {
       "userId": "e504cd9d-30da-497f-8f28-2b3f64220e16",
       "sessionId": "fd4807ab825ee8bd950b1e8b",
       "referrer": "liquid.aquitaine",
       "userAgent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.02",
       # mismatched data type
-      "ip": 221239115199,
+      "ip": 212234672,
       "hostname": "consequently.com",
       "os": "Gentoo",
       "timestamp": "2022-09-16T07:13:29Z",
@@ -194,5 +228,7 @@ if __name__ == '__main__':
     }
 
     res = lambda_handler(event, {})
-    pprint.pprint(res)
+    for elem in res['records']:
+      print(f"[{elem['result']}]")
+      print(base64.b64decode(elem['data']).decode('utf-8'))
 

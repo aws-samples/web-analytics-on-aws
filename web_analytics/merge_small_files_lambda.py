@@ -18,8 +18,33 @@ from constructs import Construct
 
 class MergeSmallFilesLambdaStack(Stack):
 
-  def __init__(self, scope: Construct, construct_id: str, s3_bucket_name, **kwargs) -> None:
+  def __init__(self, scope: Construct, construct_id: str, s3_bucket_name, s3_folder_name, athena_work_group, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
+
+    _lambda_env = self.node.try_get_context('merge_small_files_lambda_env')
+
+    LAMBDA_ENV_VARS = [
+      'OLD_DATABASE',
+      'OLD_TABLE_NAME',
+      'NEW_DATABASE',
+      'NEW_TABLE_NAME',
+      'ATHENA_WORK_GROUP',
+      'OLD_TABLE_LOCATION_PREFIX',
+      'OUTPUT_PREFIX',
+      'STAGING_OUTPUT_PREFIX',
+      'COLUMN_NAMES'
+    ]
+
+    lambda_fn_env = {k: v for k, v in _lambda_env.items() if k in LAMBDA_ENV_VARS}
+    additional_lambda_fn_env = {
+      'ATHENA_WORK_GROUP': athena_work_group,
+      'OLD_TABLE_LOCATION_PREFIX': f"s3://{os.path.join(s3_bucket_name, s3_folder_name)}",
+      'OUTPUT_PREFIX': f"s3://{os.path.join(s3_bucket_name, _lambda_env['NEW_TABLE_S3_FOLDER_NAME'])}",
+      'STAGING_OUTPUT_PREFIX': f"s3://{os.path.join(s3_bucket_name, 'tmp')}"
+    }
+    lambda_fn_env.update(additional_lambda_fn_env)
+
+    self.s3_json_location, self.s3_parquet_location = (lambda_fn_env['OLD_TABLE_LOCATION_PREFIX'], lambda_fn_env['OUTPUT_PREFIX'])
 
     merge_small_files_lambda_fn = aws_lambda.Function(self, "MergeSmallFiles",
       runtime=aws_lambda.Runtime.PYTHON_3_9,
@@ -27,18 +52,7 @@ class MergeSmallFilesLambdaStack(Stack):
       handler="athena_ctas.lambda_handler",
       description="Merge small files in S3",
       code=aws_lambda.Code.from_asset('./src/main/python/MergeSmallFiles'),
-      environment={
-        #TODO: MUST set appropriate environment variables for your workloads.
-        'OLD_DATABASE': 'mydatabase',
-        'OLD_TABLE_NAME': 'web_log_json',
-        'NEW_DATABASE': 'mydatabase',
-        'NEW_TABLE_NAME': 'web_log_parquet',
-        'WORK_GROUP': 'primary',
-        'OLD_TABLE_LOCATION_PREFIX': 's3://{}'.format(os.path.join(s3_bucket_name, 'json-data')),
-        'OUTPUT_PREFIX': 's3://{}'.format(os.path.join(s3_bucket_name, 'parquet-data')),
-        'STAGING_OUTPUT_PREFIX': 's3://{}'.format(os.path.join(s3_bucket_name, 'tmp')),
-        'COLUMN_NAMES': 'userId,sessionId,referrer,userAgent,ip,hostname,os,timestamp,uri',
-      },
+      environment=lambda_fn_env,
       timeout=cdk.Duration.minutes(5)
     )
 
@@ -46,6 +60,7 @@ class MergeSmallFilesLambdaStack(Stack):
       effect=aws_iam.Effect.ALLOW,
       resources=["*"],
       actions=["athena:*"]))
+
     merge_small_files_lambda_fn.add_to_role_policy(aws_iam.PolicyStatement(
       effect=aws_iam.Effect.ALLOW,
       resources=["*"],
@@ -54,6 +69,7 @@ class MergeSmallFilesLambdaStack(Stack):
         "s3:AbortMultipartUpload",
         "s3:PutObject",
       ]))
+
     merge_small_files_lambda_fn.add_to_role_policy(aws_iam.PolicyStatement(
       effect=aws_iam.Effect.ALLOW,
       resources=["*"],
@@ -77,6 +93,7 @@ class MergeSmallFilesLambdaStack(Stack):
         "glue:GetPartitions",
         "glue:BatchGetPartition"
       ]))
+
     merge_small_files_lambda_fn.add_to_role_policy(aws_iam.PolicyStatement(
       effect=aws_iam.Effect.ALLOW,
       resources=["*"],
@@ -92,4 +109,8 @@ class MergeSmallFilesLambdaStack(Stack):
       log_group_name=f"/aws/lambda/{self.stack_name}/MergeSmallFiles",
       retention=aws_logs.RetentionDays.THREE_DAYS)
     log_group.grant_write(merge_small_files_lambda_fn)
+
+    cdk.CfnOutput(self, f'{self.stack_name}_MergeFilesFuncName',
+      value=merge_small_files_lambda_fn.function_name,
+      export_name='MergeFilesLambdaFuncName')
 
