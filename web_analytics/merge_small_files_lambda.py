@@ -101,7 +101,7 @@ class MergeSmallFilesLambdaStack(Stack):
 
     lambda_fn_target = aws_events_targets.LambdaFunction(merge_small_files_lambda_fn)
     aws_events.Rule(self, "ScheduleRule",
-      schedule=aws_events.Schedule.cron(minute="5"),
+      schedule=aws_events.Schedule.cron(minute="10"),
       targets=[lambda_fn_target]
     )
 
