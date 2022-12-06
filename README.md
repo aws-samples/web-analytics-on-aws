@@ -65,21 +65,35 @@ At this point you can now synthesize the CloudFormation template for this code.
 <pre>
 (.venv) $ export CDK_DEFAULT_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 (.venv) $ export CDK_DEFAULT_REGION=$(curl -s 169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-(.venv) $ cdk synth --all \
-              --parameters KinesisStreamName='your-kinesis-data-stream-name' \
-              --parameters FirehoseStreamName='your-delivery-stream-name' \
+(.venv) $ cdk synth WebAnalyticsVpc
+(.venv) $ cdk synth WebAnalyticsKdsProxyApiGw
+(.venv) $ cdk synth WebAnalyticsKinesisStream \
+              --parameters KinesisStreamName=<i>'your-kinesis-data-stream-name'</i> \
+(.venv) $ cdk synth WebAnalyticsFirehoseDataTransformLambda \
               --parameters LambdaLayerCodeS3BucketName=<i>'your-s3-bucket-name-for-lambda-layer-code'</i> \
               --parameters LambdaLayerCodeS3ObjectKey=<i>'your-s3-object-key-for-lambda-layer-code'</i>
+(.venv) $ cdk synth WebAnalyticsFirehose \
+              --parameters FirehoseStreamName=<i>'your-delivery-stream-name'</i>
+(.venv) $ cdk synth WebAnalyticsAthenaWorkGroup
+(.venv) $ cdk synth WebAnalyticsMergeSmallFiles
+(.venv) $ cdk synth WebAnalyticsAthenaNamedQueries
 </pre>
 
 Use `cdk deploy` command to create the stack shown above.
 
 <pre>
-(.venv) $ cdk deploy --require-approval never --all \
-              --parameters KinesisStreamName='your-kinesis-data-stream-name' \
-              --parameters FirehoseStreamName='your-delivery-stream-name' \
+(.venv) $ cdk deploy --require-approval never WebAnalyticsVpc
+(.venv) $ cdk deploy --require-approval never WebAnalyticsKdsProxyApiGw
+(.venv) $ cdk deploy --require-approval never WebAnalyticsKinesisStream \
+              --parameters KinesisStreamName=<i>'your-kinesis-data-stream-name'</i> \
+(.venv) $ cdk deploy --require-approval never WebAnalyticsFirehoseDataTransformLambda \
               --parameters LambdaLayerCodeS3BucketName=<i>'your-s3-bucket-name-for-lambda-layer-code'</i> \
               --parameters LambdaLayerCodeS3ObjectKey=<i>'your-s3-object-key-for-lambda-layer-code'</i>
+(.venv) $ cdk deploy --require-approval never WebAnalyticsFirehose \
+              --parameters FirehoseStreamName=<i>'your-delivery-stream-name'</i>
+(.venv) $ cdk deploy --require-approval never WebAnalyticsAthenaWorkGroup
+(.venv) $ cdk deploy --require-approval never WebAnalyticsMergeSmallFiles
+(.venv) $ cdk deploy --require-approval never WebAnalyticsAthenaNamedQueries
 </pre>
 
 To add additional dependencies, for example other CDK libraries, just add
