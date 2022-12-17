@@ -26,14 +26,18 @@ kds_stack = KdsStack(app, 'WebAnalyticsKinesisStream')
 
 firehose_data_transform_lambda = FirehoseDataTransformLambdaStack(app,
   'WebAnalyticsFirehoseDataTransformLambda')
+firehose_data_transform_lambda.add_dependency(vpc_stack)
 
 firehose_stack = FirehoseStack(app, 'WebAnalyticsFirehose',
   kds_stack.target_kinesis_stream.stream_arn,
   firehose_data_transform_lambda.schema_validator_lambda_fn)
+firehose_stack.add_dependency(kds_stack)
+firehose_stack.add_dependency(firehose_data_transform_lambda)
 
 athena_work_group_stack = AthenaWorkGroupStack(app,
   'WebAnalyticsAthenaWorkGroup'
 )
+athena_work_group_stack.add_dependency(firehose_stack)
 
 merge_small_files_stack = MergeSmallFilesLambdaStack(app,
   'WebAnalyticsMergeSmallFiles',
@@ -41,12 +45,14 @@ merge_small_files_stack = MergeSmallFilesLambdaStack(app,
   firehose_stack.s3_dest_folder_name,
   athena_work_group_stack.athena_work_group_name
 )
+merge_small_files_stack.add_dependency(athena_work_group_stack)
 
-AthenaNamedQueryStack(app,
+athena_named_query_stack = AthenaNamedQueryStack(app,
   'WebAnalyticsAthenaNamedQueries',
   athena_work_group_stack.athena_work_group_name,
   merge_small_files_stack.s3_json_location,
   merge_small_files_stack.s3_parquet_location
 )
+athena_named_query_stack.add_dependency(merge_small_files_stack)
 
 app.synth()

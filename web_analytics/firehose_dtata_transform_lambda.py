@@ -17,21 +17,15 @@ class FirehoseDataTransformLambdaStack(Stack):
   def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
-    LAMBDA_LAYER_CODE_S3_BUCKET = cdk.CfnParameter(self, 'LambdaLayerCodeS3BucketName',
-      type='String',
-      description='S3 bucket for lambda layer codes'
-    )
+    firehose_data_transform_lambda_config = self.node.try_get_context('firehose_data_tranform_lambda')
+    LAMBDA_LAYER_CODE_S3_BUCKET = firehose_data_transform_lambda_config['s3_bucket_name']
+    LAMBDA_LAYER_CODE_S3_OBJ_KEY = firehose_data_transform_lambda_config['s3_object_key']
 
-    LAMBDA_LAYER_CODE_S3_OBJ_KEY = cdk.CfnParameter(self, 'LambdaLayerCodeS3ObjectKey',
-      type='String',
-      description='S3 object key for lambda layer codes'
-    )
-
-    s3_lambda_layer_lib_bucket = s3.Bucket.from_bucket_name(self, "LambdaLayerS3Bucket", LAMBDA_LAYER_CODE_S3_BUCKET.value_as_string)
+    s3_lambda_layer_lib_bucket = s3.Bucket.from_bucket_name(self, "LambdaLayerS3Bucket", LAMBDA_LAYER_CODE_S3_BUCKET)
     lambda_lib_layer = aws_lambda.LayerVersion(self, "SchemaValidatorLib",
       layer_version_name="fastavro-lib",
       compatible_runtimes=[aws_lambda.Runtime.PYTHON_3_9],
-      code=aws_lambda.Code.from_bucket(s3_lambda_layer_lib_bucket, LAMBDA_LAYER_CODE_S3_OBJ_KEY.value_as_string)
+      code=aws_lambda.Code.from_bucket(s3_lambda_layer_lib_bucket, LAMBDA_LAYER_CODE_S3_OBJ_KEY)
     )
 
     SCHEMA_VALIDATOR_LAMBDA_FN_NAME = "SchemaValidator"

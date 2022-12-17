@@ -21,11 +21,7 @@ class AthenaWorkGroupStack(Stack):
   def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
-    ATHENA_WORK_GROUP_NAME = cdk.CfnParameter(self, 'AthenaWorkGroupName',
-      type='String',
-      description='Amazon Athena Workgroup Name',
-      default='WebAnalyticsGroup'
-    )
+    ATHENA_WORK_GROUP_NAME = self.node.try_get_context('athena_workgroup_name') or 'WebAnalyticsGroup'
 
     S3_BUCKET_SUFFIX = ''.join(random.sample((string.ascii_lowercase + string.digits), k=7))
     s3_bucket = s3.Bucket(self, "s3bucket",
@@ -34,7 +30,7 @@ class AthenaWorkGroupStack(Stack):
         region=cdk.Aws.REGION, suffix=S3_BUCKET_SUFFIX))
 
     athena_cfn_work_group = aws_athena.CfnWorkGroup(self, 'AthenaCfnWorkGroup',
-      name=ATHENA_WORK_GROUP_NAME.value_as_string,
+      name=ATHENA_WORK_GROUP_NAME,
 
       # the properties below are optional
       description='workgroup for developer',
@@ -42,7 +38,7 @@ class AthenaWorkGroupStack(Stack):
       state='ENABLED', # [DISABLED, ENABLED]
       tags=[cdk.CfnTag(
         key='Name',
-        value=ATHENA_WORK_GROUP_NAME.value_as_string
+        value=ATHENA_WORK_GROUP_NAME
       )],
       work_group_configuration=aws_athena.CfnWorkGroup.WorkGroupConfigurationProperty(
         #XXX: EnforceWorkGroupConfiguration

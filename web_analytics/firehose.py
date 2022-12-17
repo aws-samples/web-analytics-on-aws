@@ -27,14 +27,10 @@ class FirehoseStack(Stack):
       bucket_name="web-analytics-{region}-{suffix}".format(
         region=cdk.Aws.REGION, suffix=S3_BUCKET_SUFFIX))
 
-    FIREHOSE_STREAM_NAME = cdk.CfnParameter(self, 'FirehoseStreamName',
-      type='String',
-      description='kinesis data firehose name',
-      default='PUT-S3-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
-    )
-
+    FIREHOSE_DEFAULT_STREAM_NAME = 'PUT-S3-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
     firehose_config = self.node.try_get_context('firehose')
 
+    FIREHOSE_STREAM_NAME = firehose_config.get('stream_name', FIREHOSE_DEFAULT_STREAM_NAME)
     FIREHOSE_BUFFER_SIZE = firehose_config['buffer_size_in_mbs']
     FIREHOSE_BUFFER_INTERVAL = firehose_config['buffer_interval_in_seconds']
     FIREHOSE_LAMBDA_BUFFER_SIZE = firehose_config['lambda_buffer_size_in_mbs']
@@ -87,7 +83,7 @@ class FirehoseStack(Stack):
         "kinesis:GetRecords"]
     ))
 
-    firehose_log_group_name = f"/aws/kinesisfirehose/{FIREHOSE_STREAM_NAME.value_as_string}"
+    firehose_log_group_name = f"/aws/kinesisfirehose/{FIREHOSE_STREAM_NAME}"
     firehose_role_policy_doc.add_statements(aws_iam.PolicyStatement(
       effect=aws_iam.Effect.ALLOW,
       #XXX: The ARN will be formatted as follows:
@@ -112,7 +108,7 @@ class FirehoseStack(Stack):
 
     firehose_role = aws_iam.Role(self, "KinesisFirehoseDeliveryRole",
       role_name="KinesisFirehoseServiceRole-{stream_name}-{region}".format(
-        stream_name=FIREHOSE_STREAM_NAME.value_as_string, region=cdk.Aws.REGION),
+        stream_name=FIREHOSE_STREAM_NAME, region=cdk.Aws.REGION),
       assumed_by=aws_iam.ServicePrincipal("firehose.amazonaws.com"),
       #XXX: use inline_policies to work around https://github.com/aws/aws-cdk/issues/5221
       inline_policies={
@@ -179,7 +175,7 @@ class FirehoseStack(Stack):
     )
 
     firehose_to_s3_delivery_stream = aws_kinesisfirehose.CfnDeliveryStream(self, "KinesisFirehoseToS3",
-      delivery_stream_name=FIREHOSE_STREAM_NAME.value_as_string,
+      delivery_stream_name=FIREHOSE_STREAM_NAME,
       delivery_stream_type="KinesisStreamAsSource",
       kinesis_stream_source_configuration={
         "kinesisStreamArn": source_kinesis_stream_arn,

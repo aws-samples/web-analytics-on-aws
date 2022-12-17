@@ -19,16 +19,13 @@ class KdsStack(Stack):
   def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
-    KINESIS_STREAM_NAME = cdk.CfnParameter(self, 'KinesisStreamName',
-      type='String',
-      description='kinesis data stream name',
-      default='PUT-Firehose-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
-    )
+    KINESIS_DEFAULT_STREAM_NAME = 'PUT-Firehose-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
+    KINESIS_STREAM_NAME = self.node.try_get_context('kinesis_stream_name') or KINESIS_DEFAULT_STREAM_NAME
 
     source_kinesis_stream = aws_kinesis.Stream(self, "SourceKinesisStreams",
       retention_period=Duration.hours(24),
       stream_mode=aws_kinesis.StreamMode.ON_DEMAND,
-      stream_name=KINESIS_STREAM_NAME.value_as_string)
+      stream_name=KINESIS_STREAM_NAME)
 
     self.target_kinesis_stream = source_kinesis_stream
 
