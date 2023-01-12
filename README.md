@@ -45,14 +45,14 @@ Once the virtualenv is activated, you can install the required dependencies.
 
 Before deployment, you should uplad zipped code files to s3 like this:
 <pre>
-(.venv) $ aws s3api create-bucket --bucket <i>your-s3-bucket-name-for-lambda-layer-code</i> --region <i>region-name</i>
+(.venv) $ aws s3api create-bucket --bucket <i>your-s3-bucket-name-for-lambda-layer-code</i> --create-bucket-configuration LocationConstraint=<i>region-name</i>
 (.venv) $ ./build-aws-lambda-layer-package.sh <i>your-s3-bucket-name-for-lambda-layer-code</i>
 </pre>
 (:warning: Make sure you have **Docker** installed.)
 
 For example,
 <pre>
-(.venv) $ aws s3api create-bucket --bucket lambda-layer-resources --region us-east-1
+(.venv) $ aws s3api create-bucket --bucket lambda-layer-resources --create-bucket-configuration LocationConstraint=us-east-1
 (.venv) $ ./build-aws-lambda-layer-package.sh lambda-layer-resources
 </pre>
 
