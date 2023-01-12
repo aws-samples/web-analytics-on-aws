@@ -48,6 +48,7 @@ Before deployment, you should uplad zipped code files to s3 like this:
 (.venv) $ aws s3api create-bucket --bucket <i>your-s3-bucket-name-for-lambda-layer-code</i> --region <i>region-name</i>
 (.venv) $ ./build-aws-lambda-layer-package.sh <i>your-s3-bucket-name-for-lambda-layer-code</i>
 </pre>
+(:warning: Regions outside of `us-east-1` require the appropriate LocationConstraint to be specified in order to create the bucket in the desired region. For more information, check this [docs](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/s3api/create-bucket.html#examples))
 (:warning: Make sure you have **Docker** installed.)
 
 For example,
