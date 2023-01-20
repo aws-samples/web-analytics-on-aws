@@ -138,7 +138,7 @@ command.
      and click the **Run** button to execute the query.
 
      <pre>
-     CREATE DATABASE mydatabase
+     CREATE DATABASE IF NOT EXISTS mydatabase
      </pre>
 
     * (step 2) Create a table
@@ -187,7 +187,7 @@ command.
 
       <pre>
       ALTER TABLE mydatabase.web_log_json ADD IF NOT EXISTS
-      PARTITION (year='2023', month='01', day='10', hour='06')
+      PARTITION (year=2023, month=1, day=10, hour=6)
       LOCATION 's3://web-analytics-<i>xxxxx</i>/json-data/year=2023/month=01/day=10/hour=06/';
       </pre>
 
