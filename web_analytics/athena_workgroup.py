@@ -2,9 +2,6 @@
 # -*- encoding: utf-8 -*-
 # vim: tabstop=2 shiftwidth=2 softtabstop=2 expandtab
 
-import random
-import string
-
 import aws_cdk as cdk
 
 from aws_cdk import (
@@ -14,7 +11,6 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-random.seed(31)
 
 class AthenaWorkGroupStack(Stack):
 
@@ -23,11 +19,11 @@ class AthenaWorkGroupStack(Stack):
 
     ATHENA_WORK_GROUP_NAME = self.node.try_get_context('athena_workgroup_name') or 'WebAnalyticsGroup'
 
-    S3_BUCKET_SUFFIX = ''.join(random.sample((string.ascii_lowercase + string.digits), k=7))
+    S3_DEFAULT_BUCKET_NAME = 'aws-athena-query-results-{region}-{account_id}'.format(
+        region=cdk.Aws.REGION, account_id=cdk.Aws.ACCOUNT_ID)
     s3_bucket = s3.Bucket(self, "s3bucket",
       removal_policy=cdk.RemovalPolicy.DESTROY, #XXX: Default: core.RemovalPolicy.RETAIN - The bucket will be orphaned
-      bucket_name='aws-athena-query-results-{region}-{suffix}'.format(
-        region=cdk.Aws.REGION, suffix=S3_BUCKET_SUFFIX))
+      bucket_name=S3_DEFAULT_BUCKET_NAME)
 
     athena_cfn_work_group = aws_athena.CfnWorkGroup(self, 'AthenaCfnWorkGroup',
       name=ATHENA_WORK_GROUP_NAME,

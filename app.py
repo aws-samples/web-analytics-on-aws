@@ -11,7 +11,8 @@ from web_analytics import (
   MergeSmallFilesLambdaStack,
   AthenaWorkGroupStack,
   AthenaNamedQueryStack,
-  VpcStack
+  VpcStack,
+  GlueCatalogDatabaseStack
 )
 
 AWS_ENV = cdk.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'),
@@ -47,12 +48,15 @@ merge_small_files_stack = MergeSmallFilesLambdaStack(app,
 )
 merge_small_files_stack.add_dependency(athena_work_group_stack)
 
+athena_databases = GlueCatalogDatabaseStack(app, 'WebAnalyticsGlueDatabases')
+athena_databases.add_dependency(merge_small_files_stack)
+
 athena_named_query_stack = AthenaNamedQueryStack(app,
   'WebAnalyticsAthenaNamedQueries',
   athena_work_group_stack.athena_work_group_name,
   merge_small_files_stack.s3_json_location,
   merge_small_files_stack.s3_parquet_location
 )
-athena_named_query_stack.add_dependency(merge_small_files_stack)
+athena_named_query_stack.add_dependency(athena_databases)
 
 app.synth()

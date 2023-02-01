@@ -88,6 +88,25 @@ Use `cdk deploy` command to create the stack shown above.
 (.venv) $ cdk deploy --require-approval never --all
 </pre>
 
+After all CDK stacks are successfully deployed, you need to grant appropriate LakeFormation permissions to the AWS Lambda function merging many small files to a few of large parquet files by running the following commands:
+<pre>
+(.venv) $ MERGE_SMALL_FILES_JOB_ROLE_ARN=$(aws cloudformation describe-stacks \
+            --stack-name WebAnalyticsMergeSmallFiles | \
+            jq -r '.Stacks[0].Outputs[] | \
+            select(.OutputKey | endswith("LambdaExecRoleArn")) | \
+            .OutputValue')
+(.venv) $ aws lakeformation grant-permissions \
+              --principal DataLakePrincipalIdentifier=${MERGE_SMALL_FILES_JOB_ROLE_ARN} \
+              --permissions CREATE_TABLE DESCRIBE ALTER DROP \
+              --resource '{ "Database": { "Name": "<i>mydatabase</i>" } }'
+(.venv) $ aws lakeformation grant-permissions \
+              --principal DataLakePrincipalIdentifier=${MERGE_SMALL_FILES_JOB_ROLE_ARN} \
+              --permissions SELECT DESCRIBE ALTER INSERT DELETE DROP \
+              --resource '{ "Table": {"DatabaseName": "<i>mydatabase</i>", "TableWildcard": {}} }'
+</pre>
+
+:information_source: `mydatabase` is the database for access logs specified as `OLD_DATABASE` and `NEW_DATABASE` in the `cdk.context.json` file.
+
 To add additional dependencies, for example other CDK libraries, just add
 them to your `setup.py` file and rerun the `pip install -r requirements.txt`
 command.
@@ -131,8 +150,14 @@ command.
    </pre>
 3. Creating and loading a table with partitioned data in Amazon Athena
 
-   Go to [Athena](https://console.aws.amazon.com/athena/home) on the AWS Management console.<br/>
-   * (step 1) Create a database
+   Go to [Athena](https://console.aws.amazon.com/athena/home) on the AWS Management console.
+
+   * (step 1) Specify the workgroup to use
+
+     To run queries, switch to the appropriate workgroup like this:
+     ![amazon-athena-switching-to-workgroup](./assets/amazon-athena-switching-to-workgroup.png)
+
+   * (step 2) Create a database
 
      In order to create a new database called `mydatabase`, enter the following statement in the Athena query editor
      and click the **Run** button to execute the query.
@@ -141,7 +166,7 @@ command.
      CREATE DATABASE IF NOT EXISTS mydatabase
      </pre>
 
-    * (step 2) Create a table
+    * (step 3) Create a table
 
       Copy the following query into the Athena query editor, replace the `xxxxxxx` in the last line under `LOCATION` with the string of your S3 bucket, and execute the query to create a new table.
       <pre>
@@ -173,7 +198,19 @@ command.
 
       If you get an error, check if (a) you have updated the `LOCATION` to the correct S3 bucket name, (b) you have mydatabase selected under the Database dropdown, and (c) you have `AwsDataCatalog` selected as the **Data source**.
 
-    * (step 3) Load the partition data
+      :information_source: If you fail to create the table, give Athena users access permissions on `mydatabase` through [AWS Lake Formation](https://console.aws.amazon.com/lakeformation/home), or you can grant anyone using Athena to access `mydatabase` by running the following command:
+      <pre>
+      (.venv) $ aws lakeformation grant-permissions \
+                    --principal DataLakePrincipalIdentifier=arn:aws:iam::<i>{account-id}</i>:user/<i>example-user-id</i> \
+                    --permissions CREATE_TABLE DESCRIBE ALTER DROP \
+                    --resource '{ "Database": { "Name": "<i>mydatabase</i>" } }'
+      (.venv) $ aws lakeformation grant-permissions \
+                    --principal DataLakePrincipalIdentifier=arn:aws:iam::<i>{account-id}</i>:user/<i>example-user-id</i> \
+                    --permissions SELECT DESCRIBE ALTER INSERT DELETE DROP \
+                     --resource '{ "Table": {"DatabaseName": "<i>mydatabase</i>", "TableWildcard": {}} }'
+      </pre>
+
+    * (step 4) Load the partition data
 
       Run the following query to load the partition data.
       <pre>
@@ -191,7 +228,7 @@ command.
       LOCATION 's3://web-analytics-<i>xxxxx</i>/json-data/year=2023/month=01/day=10/hour=06/';
       </pre>
 
-    * (Optional) (step 4) Check partitions
+    * (Optional) (step 5) Check partitions
 
       Run the following query to list all the partitions in an Athena table in unsorted order.
 
@@ -206,6 +243,7 @@ command.
    SELECT COUNT(*)
    FROM mydatabase.web_log_json;
    </pre>
+
 5. Merge small files into large one
 
    When real-time incoming data is stored in S3 using Kinesis Data Firehose, files with small data size are created.<br/>

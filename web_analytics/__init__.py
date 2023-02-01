@@ -6,3 +6,4 @@ from .firehose import FirehoseStack
 from .kds import KdsStack
 from .merge_small_files_lambda import MergeSmallFilesLambdaStack
 from .vpc import VpcStack
+from .glue_catalog_database import GlueCatalogDatabaseStack

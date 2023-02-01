@@ -21,11 +21,10 @@ class FirehoseStack(Stack):
   def __init__(self, scope: Construct, construct_id: str, source_kinesis_stream_arn, data_transform_lambda_fn, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
-    S3_BUCKET_SUFFIX = ''.join(random.sample((string.ascii_lowercase + string.digits), k=7))
     s3_bucket = s3.Bucket(self, "s3bucket",
       removal_policy=cdk.RemovalPolicy.DESTROY, #XXX: Default: cdk.RemovalPolicy.RETAIN - The bucket will be orphaned
-      bucket_name="web-analytics-{region}-{suffix}".format(
-        region=cdk.Aws.REGION, suffix=S3_BUCKET_SUFFIX))
+      bucket_name="web-analytics-{region}-{account_id}".format(
+        region=cdk.Aws.REGION, account_id=cdk.Aws.ACCOUNT_ID))
 
     FIREHOSE_DEFAULT_STREAM_NAME = 'PUT-S3-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
     firehose_config = self.node.try_get_context('firehose')
