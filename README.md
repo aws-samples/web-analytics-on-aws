@@ -249,7 +249,7 @@ command.
    When real-time incoming data is stored in S3 using Kinesis Data Firehose, files with small data size are created.<br/>
    To improve the query performance of Amazon Athena, it is recommended to combine small files into one large file.<br/>
    Also, it is better to use columnar dataformat (e.g., `Parquet`, `ORC`, `AVRO`, etc) instead of `JSON` in Amazon Athena.<br/>
-   To run these tasks periodically, the AWS Lambda function function that executes Athena's Create Table As Select (CTAS) query has been deployed.<br/>
+   To run these tasks periodically, the AWS Lambda function that executes Athena's Create Table As Select (CTAS) query has been deployed.<br/>
    Now we create an Athena table to query for large files that are created by periodical merge files task.
    <pre>
    CREATE EXTERNAL TABLE mydatabase.web_log_parquet (
