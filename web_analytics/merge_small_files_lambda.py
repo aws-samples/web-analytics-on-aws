@@ -40,7 +40,8 @@ class MergeSmallFilesLambdaStack(Stack):
       'ATHENA_WORK_GROUP': athena_work_group,
       'OLD_TABLE_LOCATION_PREFIX': f"s3://{os.path.join(s3_bucket_name, s3_folder_name)}",
       'OUTPUT_PREFIX': f"s3://{os.path.join(s3_bucket_name, _lambda_env['NEW_TABLE_S3_FOLDER_NAME'])}",
-      'STAGING_OUTPUT_PREFIX': f"s3://{os.path.join(s3_bucket_name, 'tmp')}"
+      'STAGING_OUTPUT_PREFIX': f"s3://{os.path.join(s3_bucket_name, 'tmp')}",
+      'REGION_NAME': cdk.Aws.REGION
     }
     lambda_fn_env.update(additional_lambda_fn_env)
 

@@ -217,11 +217,11 @@ if __name__ == '__main__':
     "id": "cdc73f9d-aea9-11e3-9d5a-835b769c0d9c",
     "detail-type": "Scheduled Event",
     "source": "aws.events",
-    "account": "{{{account-id}}}",
-    "time": options.basic_datetime,
-    "region": "us-east-1",
+    "account": "123456789012",
+    "time": options.basic_datetime, # ex) "2020-02-28T03:05:00Z"
+    "region": AWS_REGION, # ex) "us-east-1",
     "resources": [
-      "arn:aws:events:us-east-1:123456789012:rule/ExampleRule"
+      f"arn:aws:events:{AWS_REGION}:123456789012:rule/ExampleRule"
     ],
     "detail": {}
   }
