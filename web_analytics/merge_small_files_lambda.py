@@ -112,9 +112,11 @@ class MergeSmallFilesLambdaStack(Stack):
       retention=aws_logs.RetentionDays.THREE_DAYS)
     log_group.grant_write(merge_small_files_lambda_fn)
 
+    self.lambda_exec_role = merge_small_files_lambda_fn.role
+
     cdk.CfnOutput(self, f'{self.stack_name}_MergeFilesFuncName',
       value=merge_small_files_lambda_fn.function_name,
       export_name='MergeFilesLambdaFuncName')
 
     cdk.CfnOutput(self, f'{self.stack_name}_LambdaExecRoleArn',
-      value=merge_small_files_lambda_fn.role.role_arn)
+      value=self.lambda_exec_role.role_arn)

@@ -12,7 +12,8 @@ from web_analytics import (
   AthenaWorkGroupStack,
   AthenaNamedQueryStack,
   VpcStack,
-  GlueCatalogDatabaseStack
+  GlueCatalogDatabaseStack,
+  DataLakePermissionsStack
 )
 
 AWS_ENV = cdk.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'),
@@ -51,12 +52,17 @@ merge_small_files_stack.add_dependency(athena_work_group_stack)
 athena_databases = GlueCatalogDatabaseStack(app, 'WebAnalyticsGlueDatabases')
 athena_databases.add_dependency(merge_small_files_stack)
 
+lakeformation_grant_permissions = DataLakePermissionsStack(app, 'WebAnalyticsGrantLFPermissionsOnMergeFilesJob',
+  merge_small_files_stack.lambda_exec_role
+)
+lakeformation_grant_permissions.add_dependency(athena_databases)
+
 athena_named_query_stack = AthenaNamedQueryStack(app,
   'WebAnalyticsAthenaNamedQueries',
   athena_work_group_stack.athena_work_group_name,
   merge_small_files_stack.s3_json_location,
   merge_small_files_stack.s3_parquet_location
 )
-athena_named_query_stack.add_dependency(athena_databases)
+athena_named_query_stack.add_dependency(lakeformation_grant_permissions)
 
 app.synth()
