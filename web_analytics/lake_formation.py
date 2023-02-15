@@ -29,7 +29,7 @@ class DataLakePermissionsStack(Stack):
     )
 
     for idx, database_name in enumerate(database_list):
-      lf_permissions_on_database = aws_lakeformation.CfnPrincipalPermissions(self, "LFPermissionsOnDatabase{idx}",
+      lf_permissions_on_database = aws_lakeformation.CfnPrincipalPermissions(self, f"LFPermissionsOnDatabase{idx}",
         permissions=["CREATE_TABLE", "DROP", "ALTER", "DESCRIBE"],
         permissions_with_grant_option=[],
         principal=aws_lakeformation.CfnPrincipalPermissions.DataLakePrincipalProperty(
@@ -49,7 +49,7 @@ class DataLakePermissionsStack(Stack):
       lf_permissions_on_database.add_dependency(cfn_data_lake_settings)
 
     for idx, database_name in enumerate(database_list):
-      lf_permissions_on_table = aws_lakeformation.CfnPrincipalPermissions(self, "LFPermissionsOnTable{idx}",
+      lf_permissions_on_table = aws_lakeformation.CfnPrincipalPermissions(self, f"LFPermissionsOnTable{idx}",
         permissions=["SELECT", "INSERT", "DELETE", "DESCRIBE", "ALTER"],
         permissions_with_grant_option=[],
         principal=aws_lakeformation.CfnPrincipalPermissions.DataLakePrincipalProperty(
