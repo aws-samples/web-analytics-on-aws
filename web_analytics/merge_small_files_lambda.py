@@ -48,7 +48,7 @@ class MergeSmallFilesLambdaStack(Stack):
     self.s3_json_location, self.s3_parquet_location = (lambda_fn_env['OLD_TABLE_LOCATION_PREFIX'], lambda_fn_env['OUTPUT_PREFIX'])
 
     merge_small_files_lambda_fn = aws_lambda.Function(self, "MergeSmallFiles",
-      runtime=aws_lambda.Runtime.PYTHON_3_9,
+      runtime=aws_lambda.Runtime.PYTHON_3_11,
       function_name="MergeSmallFiles",
       handler="athena_ctas.lambda_handler",
       description="Merge small files in S3",

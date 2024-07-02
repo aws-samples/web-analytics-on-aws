@@ -24,13 +24,13 @@ class FirehoseDataTransformLambdaStack(Stack):
     s3_lambda_layer_lib_bucket = s3.Bucket.from_bucket_name(self, "LambdaLayerS3Bucket", LAMBDA_LAYER_CODE_S3_BUCKET)
     lambda_lib_layer = aws_lambda.LayerVersion(self, "SchemaValidatorLib",
       layer_version_name="fastavro-lib",
-      compatible_runtimes=[aws_lambda.Runtime.PYTHON_3_9],
+      compatible_runtimes=[aws_lambda.Runtime.PYTHON_3_11],
       code=aws_lambda.Code.from_bucket(s3_lambda_layer_lib_bucket, LAMBDA_LAYER_CODE_S3_OBJ_KEY)
     )
 
     SCHEMA_VALIDATOR_LAMBDA_FN_NAME = "SchemaValidator"
     schema_validator_lambda_fn = aws_lambda.Function(self, "SchemaValidator",
-      runtime=aws_lambda.Runtime.PYTHON_3_9,
+      runtime=aws_lambda.Runtime.PYTHON_3_11,
       function_name=SCHEMA_VALIDATOR_LAMBDA_FN_NAME,
       handler="schema_validator.lambda_handler",
       description="Check if records have valid schema",

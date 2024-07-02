@@ -200,7 +200,7 @@ command.
         'org.openx.data.jsonserde.JsonSerDe'
       STORED AS INPUTFORMAT
         'org.apache.hadoop.mapred.TextInputFormat'
-      OUTPUTFORMAT 
+      OUTPUTFORMAT
         'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'
       LOCATION
         's3://web-analytics-<i>xxxxx</i>/json-data'
@@ -330,7 +330,7 @@ Enjoy!
    $ cat <<EOF > requirements-Lambda-Layer.txt
    > fastavro==1.6.1
    > EOF
-   $ docker run -v "$PWD":/var/task "public.ecr.aws/sam/build-python3.9" /bin/sh -c "pip install -r requirements-Lambda-Layer.txt -t python/lib/python3.9/site-packages/; exit"
+   $ docker run -v "$PWD":/var/task "public.ecr.aws/sam/build-python3.11" /bin/sh -c "pip install -r requirements-Lambda-Layer.txt -t python/lib/python3.11/site-packages/; exit"
    $ zip -r fastavro-lib.zip python > /dev/null
    $ aws s3 mb s3://my-bucket-for-lambda-layer-packages
    $ aws s3 cp fastavro-lib.zip s3://my-bucket-for-lambda-layer-packages/
