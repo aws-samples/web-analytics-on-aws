@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# vim: tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+
 import random
 import string
 
@@ -15,6 +18,7 @@ from constructs import Construct
 from aws_cdk.aws_kinesisfirehose import CfnDeliveryStream as cfn
 
 random.seed(31)
+
 
 class FirehoseStack(Stack):
 

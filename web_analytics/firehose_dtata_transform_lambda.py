@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import os
+# -*- encoding: utf-8 -*-
+# vim: tabstop=2 shiftwidth=2 softtabstop=2 expandtab
 
 import aws_cdk as cdk
 

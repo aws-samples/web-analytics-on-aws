@@ -16,6 +16,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+
 class MergeSmallFilesLambdaStack(Stack):
 
   def __init__(self, scope: Construct, construct_id: str, s3_bucket_name, s3_folder_name, athena_work_group, **kwargs) -> None:
