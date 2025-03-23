@@ -54,7 +54,6 @@ class FirehoseDataTransformLambdaStack(Stack):
 
     self.schema_validator_lambda_fn = schema_validator_lambda_fn
 
-    cdk.CfnOutput(self, f'{self.stack_name}_FirehoseDataTransformFuncName',
+    cdk.CfnOutput(self, 'FirehoseDataTransformFuncName',
       value=self.schema_validator_lambda_fn.function_name,
-      export_name='FirehoseDataTransformFuncName')
-
+      export_name=f'{self.stack_name}-FirehoseDataTransformFuncName')

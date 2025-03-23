@@ -29,5 +29,6 @@ class GlueCatalogDatabaseStack(Stack):
       )
       cfn_database.apply_removal_policy(cdk.RemovalPolicy.DESTROY)
 
-      cdk.CfnOutput(self, f'{self.stack_name}_GlueDatabaseName{idx}',
-        value=cfn_database.database_input.name)
+      cdk.CfnOutput(self, f'GlueDatabaseName{idx}',
+        value=cfn_database.database_input.name,
+        export_name=f'{self.stack_name}-GlueDatabaseName{idx}')

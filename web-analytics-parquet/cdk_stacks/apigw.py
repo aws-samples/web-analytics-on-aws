@@ -237,5 +237,6 @@ class KdsProxyApiGwStack(Stack):
         aws_apigateway.MethodResponse(status_code='500')
         ])
 
-    cdk.CfnOutput(self, '{}_RestApiName'.format(self.stack_name),
-      value=kds_proxy_api.rest_api_name, export_name='KdsProxyRestApiName')
+    cdk.CfnOutput(self, 'KdsRestApiName',
+      value=kds_proxy_api.rest_api_name,
+      export_name=f'{self.stack_name}-KdsProxyRestApiName')
