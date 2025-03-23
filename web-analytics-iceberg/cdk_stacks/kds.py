@@ -25,13 +25,11 @@ class KdsStack(Stack):
     KINESIS_DEFAULT_STREAM_NAME = 'PUT-Firehose-{}'.format(''.join(random.sample((string.ascii_letters), k=5)))
     KINESIS_STREAM_NAME = self.node.try_get_context('kinesis_stream_name') or KINESIS_DEFAULT_STREAM_NAME
 
-    source_kinesis_stream = aws_kinesis.Stream(self, "SourceKinesisStreams",
+    self.kinesis_stream = aws_kinesis.Stream(self, "SourceKinesisStreams",
       retention_period=Duration.hours(24),
       stream_mode=aws_kinesis.StreamMode.ON_DEMAND,
       stream_name=KINESIS_STREAM_NAME)
 
-    self.target_kinesis_stream = source_kinesis_stream
-
-    cdk.CfnOutput(self, '{}_KinesisDataStreamName'.format(self.stack_name),
-      value=self.target_kinesis_stream.stream_name, export_name='KinesisDataStreamName')
-
+    cdk.CfnOutput(self, 'KinesisDataStreamName',
+      value=self.kinesis_stream.stream_name,
+      export_name=f'{self.stack_name}-KinesisDataStreamName')

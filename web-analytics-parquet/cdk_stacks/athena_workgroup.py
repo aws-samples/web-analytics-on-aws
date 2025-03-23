@@ -56,6 +56,6 @@ class AthenaWorkGroupStack(Stack):
 
     self.athena_work_group_name = athena_cfn_work_group.name
 
-    cdk.CfnOutput(self, 'f{self.stack_name}_AthenaWorkGroupName', value=self.athena_work_group_name,
-      export_name='AthenaWorkGroupName')
-
+    cdk.CfnOutput(self, 'AthenaWorkGroupName',
+      value=self.athena_work_group_name,
+      export_name=f'{self.stack_name}-AthenaWorkGroupName')
