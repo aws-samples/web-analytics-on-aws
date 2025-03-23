@@ -3,7 +3,7 @@ import os
 
 import aws_cdk as cdk
 
-from web_analytics import (
+from cdk_stacks import (
   KdsProxyApiGwStack,
   KdsStack,
   FirehoseDataTransformLambdaStack,
