@@ -172,7 +172,7 @@ Use `cdk deploy` command to create the stack shown above.
         `timestamp` timestamp,
         `uri` string
       )
-      PARTITIONED BY (os)
+      PARTITIONED BY (event)
       LOCATION 's3://web-analytics-<i>{region}</i>-</i>{account_id}</i>/web_log_iceberg_db/web_log_iceberg'
       TBLPROPERTIES (
         'table_type'='iceberg',
