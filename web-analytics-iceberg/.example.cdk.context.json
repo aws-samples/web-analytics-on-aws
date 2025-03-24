@@ -20,7 +20,7 @@
       "database_name": "web_log_iceberg_db",
       "table_name": "web_log_iceberg",
       "unique_keys": [
-        "user_id"
+        "user_id", "timestamp"
       ]
     },
     "output_prefix": "web_log_iceberg_db/web_log_iceberg",

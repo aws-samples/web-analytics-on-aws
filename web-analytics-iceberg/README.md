@@ -88,10 +88,7 @@ For example,
     },
     "destination_iceberg_table_configuration": {
       "database_name": "web_log_iceberg_db",
-      "table_name": "web_log_iceberg",
-      "unique_keys": [
-        "user_id"
-      ]
+      "table_name": "web_log_iceberg"
     },
     "output_prefix": "web_log_iceberg_db/web_log_iceberg",
     "error_output_prefix": "error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}"
@@ -100,7 +97,18 @@ For example,
 </pre>
 :information_source: `database_name`, and `table_name` of `data_firehose_configuration.destination_iceberg_table_configuration` is used in [**Set up Delivery Stream**](#set-up-delivery-stream) step.
 
-:information_source: `unique_keys` of `data_firehose_configuration.destination_iceberg_table_configuration` should be set by Iceberg table's primary column name. So, it is better to set the primary key of RDS table.
+:information_source: When updating or deleting records in an Iceberg table, specify the table's primary key column name as `unique_keys` in the `data_firehose_configuration.destination_iceberg_table_configuration` settings.
+For example,
+<pre>
+"destination_iceberg_table_configuration": {
+  "database_name": "web_log_iceberg_db",
+  "table_name": "web_log_iceberg",
+  "unique_keys": [
+    "user_id", "timestamp"
+  ]
+}
+</pre>
+
 
 Now you are ready to synthesize the CloudFormation template for this code.<br/>
 
@@ -134,7 +142,7 @@ Use `cdk deploy` command to create the stack shown above.
 (.venv) $ cdk deploy --require-approval never \
               WebAnalyticsVpc \
               WebAnalyticsKdsProxyApiGw \
-              WebAnalyticsKinesisStream \
+              WebAnalyticsKinesisStream
 </pre>
 
 ## Set up Delivery Stream

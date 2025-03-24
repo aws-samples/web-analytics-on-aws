@@ -24,7 +24,7 @@ else:
 
 DESTINATION_DATABASE_NAME = os.environ['IcebergeDatabaseName']
 DESTINATION_TABLE_NAME = os.environ['IcebergTableName']
-
+DESTINATION_TABLE_UNIQUE_KEYS = os.environ.get('IcebergTableUniqueKeys', None)
 
 ORIGINAL_SCHEMA = {
   'name': 'WebLogs',
@@ -111,6 +111,9 @@ def lambda_handler(event, context):
   counter = collections.Counter(total=0, valid=0, invalid=0)
   firehose_records_output = {'records': []}
 
+  unique_keys_exist = True if DESTINATION_TABLE_UNIQUE_KEYS else False
+  otf_metadata_operation = 'insert' if not unique_keys_exist else 'update'
+
   for record in event['records']:
     counter['total'] += 1
 
@@ -129,7 +132,7 @@ def lambda_handler(event, context):
         'otfMetadata': {
           'destinationDatabaseName': DESTINATION_DATABASE_NAME,
           'destinationTableName': DESTINATION_TABLE_NAME,
-          'operation': 'update',
+          'operation': otf_metadata_operation
         }
       }
     }

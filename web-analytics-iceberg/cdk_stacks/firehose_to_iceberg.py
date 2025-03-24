@@ -75,6 +75,8 @@ class FirehoseToIcebergStack(Stack):
     )
 
     dest_iceberg_table_config = data_firehose_configuration["destination_iceberg_table_configuration"]
+    dest_iceberg_table_unique_keys = dest_iceberg_table_config.get("unique_keys", None)
+    dest_iceberg_table_unique_keys = dest_iceberg_table_unique_keys if dest_iceberg_table_unique_keys else None
 
     iceberg_dest_config = cfn_delivery_stream.IcebergDestinationConfigurationProperty(
       catalog_configuration=cfn_delivery_stream.CatalogConfigurationProperty(
@@ -110,7 +112,7 @@ class FirehoseToIcebergStack(Stack):
         cfn_delivery_stream.DestinationTableConfigurationProperty(
           destination_database_name=dest_iceberg_table_config["database_name"],
           destination_table_name=dest_iceberg_table_config["table_name"],
-          unique_keys=dest_iceberg_table_config["unique_keys"]
+          unique_keys=dest_iceberg_table_unique_keys
         )
       ],
       processing_configuration=firehose_processing_config,

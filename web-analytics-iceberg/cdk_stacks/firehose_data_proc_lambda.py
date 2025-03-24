@@ -33,6 +33,8 @@ class FirehoseDataProcLambdaStack(Stack):
 
     data_firehose_configuration = self.node.try_get_context("data_firehose_configuration")
     dest_iceberg_table_config = data_firehose_configuration["destination_iceberg_table_configuration"]
+    dest_iceberg_table_unique_keys = dest_iceberg_table_config.get("unique_keys", None)
+    dest_iceberg_table_unique_keys = ",".join(dest_iceberg_table_unique_keys) if dest_iceberg_table_unique_keys else ""
 
     LAMBDA_FN_NAME = "WebAnalyticsFirehoseToIcebergTransformer"
     self.data_proc_lambda_fn = aws_lambda.Function(self, "FirehoseToIcebergTransformer",
@@ -43,7 +45,8 @@ class FirehoseDataProcLambdaStack(Stack):
       code=aws_lambda.Code.from_asset(os.path.join(os.path.dirname(__file__), '../src/main/python/IcebergTransformer')),
       environment={
         "IcebergeDatabaseName": dest_iceberg_table_config["database_name"],
-        "IcebergTableName": dest_iceberg_table_config["table_name"]
+        "IcebergTableName": dest_iceberg_table_config["table_name"],
+        "IcebergTableUniqueKeys": dest_iceberg_table_unique_keys
       },
       timeout=cdk.Duration.minutes(5),
       #XXX: set memory size appropriately
