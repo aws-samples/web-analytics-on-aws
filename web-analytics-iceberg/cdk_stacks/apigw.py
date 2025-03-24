@@ -55,8 +55,8 @@ class KdsProxyApiGwStack(Stack):
     )
 
     apigw_error_responses = [
-      aws_apigateway.IntegrationResponse(status_code="400", selection_pattern="4\d{2}"),
-      aws_apigateway.IntegrationResponse(status_code="500", selection_pattern="5\d{2}")
+      aws_apigateway.IntegrationResponse(status_code="400", selection_pattern="4\\d{2}"),
+      aws_apigateway.IntegrationResponse(status_code="500", selection_pattern="5\\d{2}")
     ]
 
     #XXX: GET /streams
