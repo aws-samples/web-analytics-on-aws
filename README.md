@@ -6,8 +6,9 @@ Below diagram shows what we are implementing.
 
 | Example | Architecture Diagram | Tags |
 |---------|----------------------|------|
-| [Web Log Analytics with Parquet data format](./web-analytics-parquet) | ![](./web-analytics-parquet/web-analytics-arch.svg) | Amazon API Gateway, Amazon Kinesis Data Streams, Amazon Data Firehose, Amazon S3 + Parquet, Amazon Athena, AWS Lambda, Amazon Event Bridge |
-| [Web Log Analytics with Apache Iceberg table format](./web-analytics-iceberg) | ![](./web-analytics-iceberg/web-analytics-iceberg-arch.svg) | Amazon API Gateway, Amazon Kinesis Data Streams, Amazon Data Firehose, Amazon S3 + Apache Iceberg, Amazon Athena, AWS Lambda |
+| [Web Log Analytics System with Parquet data format](./web-analytics-parquet) | ![](./web-analytics-parquet/web-analytics-arch.svg) | Amazon API Gateway, Amazon Kinesis Data Streams, Amazon Data Firehose, Amazon S3 + Parquet, Amazon Athena, AWS Lambda, Amazon Event Bridge |
+| [Web Log Analytics System with Apache Iceberg table](./web-analytics-iceberg) | ![](./web-analytics-iceberg/web-analytics-iceberg-arch.svg) | Amazon API Gateway, Amazon Kinesis Data Streams, Amazon Data Firehose, Amazon S3 + Apache Iceberg, Amazon Athena, AWS Lambda |
+| [Web Log Analytics System using API Gateway integrated with Data Firehose with Apache Iceberg table](./web-analytics-datafirehose-iceberg) | ![](./web-analytics-datafirehose-iceberg/web-analytics-datafirehose-iceberg-arch.svg) | Amazon API Gateway, Amazon Data Firehose, Amazon S3 + Apache Iceberg, Amazon Athena, AWS Lambda |
 
 ## Security
 
