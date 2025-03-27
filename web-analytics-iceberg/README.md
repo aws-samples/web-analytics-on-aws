@@ -124,7 +124,6 @@ Now let's try to deploy.
 
 ```
 (.venv) $ cdk list
-WebAnalyticsVpc
 WebAnalyticsKdsProxyApiGw
 WebAnalyticsKinesisStream
 WebAnalyticsDataFirehoseToIcebergS3Path
@@ -140,7 +139,6 @@ Use `cdk deploy` command to create the stack shown above.
 
 <pre>
 (.venv) $ cdk deploy --require-approval never \
-              WebAnalyticsVpc \
               WebAnalyticsKdsProxyApiGw \
               WebAnalyticsKinesisStream
 </pre>
