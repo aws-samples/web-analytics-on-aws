@@ -9,7 +9,6 @@ from cdk_stacks import (
   FirehoseToIcebergStack,
   FirehoseRoleStack,
   FirehoseDataProcLambdaStack,
-  VpcStack,
   DataLakePermissionsStack,
   S3BucketStack,
 )
@@ -18,8 +17,6 @@ AWS_ENV = cdk.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'),
   region=os.getenv('CDK_DEFAULT_REGION'))
 
 app = cdk.App()
-vpc_stack = VpcStack(app, 'WebAnalyticsVpc',
-  env=AWS_ENV)
 
 kds_proxy_apigw = KdsProxyApiGwStack(app, 'WebAnalyticsKdsProxyApiGw')
 kds_stack = KdsStack(app, 'WebAnalyticsKinesisStream')
