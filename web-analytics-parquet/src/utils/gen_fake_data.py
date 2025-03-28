@@ -69,7 +69,7 @@ def main():
       print(json.dumps(record), file=sys.stderr)
       continue
 
-    partition_key = record['user_id']
+    partition_key = record['userId']
     if options.api_method == 'record':
       data = {'Data': record, 'PartitionKey': partition_key}
       payload = f'{json.dumps(data)}'
