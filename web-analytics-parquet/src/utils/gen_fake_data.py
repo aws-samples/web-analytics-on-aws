@@ -46,32 +46,36 @@ def main():
 
   options = parser.parse_args()
 
-  _ = Field(locale=Locale.EN, providers=[CustomDatetime])
-  schema = Schema(schema=lambda: {
-    "userId": _("uuid"),
-    "sessionId": _("token_hex", entropy=12),
-    "referrer": _("internet.hostname"),
-    "userAgent": _("internet.user_agent"),
-    "ip": _("internet.ip_v4"),
-    "hostname": _("internet.hostname"),
-    "os": _("development.os"),
-    "timestamp": _("custom_datetime.timestamp"),
-    "uri": _("internet.uri", query_params_count=2)
-  })
+  _field = Field(locale=Locale.EN)
+  _field._generic.add_provider(CustomDatetime)
+
+  schema_definition = lambda: {
+    "userId": _field("uuid"),
+    "sessionId": _field("token_hex", entropy=12),
+    "referrer": _field("internet.hostname"),
+    "userAgent": _field("internet.user_agent"),
+    "ip": _field("internet.ip_v4"),
+    "hostname": _field("internet.hostname"),
+    "os": _field("development.os"),
+    "timestamp": _field("custom_datetime.timestamp"),
+    "uri": _field("internet.uri", query_params_count=2)
+  }
+  schema = Schema(schema=schema_definition, iterations=options.max_count)
 
   log_collector_url = f'{options.api_url}/streams/{options.stream_name}/{options.api_method}' if not options.dry_run else None
 
-  for record in schema.iterator(options.max_count):
+  for record in schema:
     if options.dry_run:
       print(json.dumps(record), file=sys.stderr)
       continue
-    
+
+    partition_key = record['userId']
     if options.api_method == 'record':
-      data = {'Data': record, 'PartitionKey': record['userId']}
+      data = {'Data': record, 'PartitionKey': partition_key}
       payload = f'{json.dumps(data)}'
     else:
       #XXX: make sure data has newline
-      data = {"records":[{'data': f'{json.dumps(record)}\n', 'partition-key': record['userId']}]}
+      data = {"records":[{'data': f'{json.dumps(record)}\n', 'partition-key': partition_key}]}
       payload = json.dumps(data)
 
     res = requests.put(log_collector_url, data=payload, headers={'Content-Type': 'application/json'})
