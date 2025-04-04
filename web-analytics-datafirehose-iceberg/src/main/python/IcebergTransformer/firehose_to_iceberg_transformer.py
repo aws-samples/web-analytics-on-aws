@@ -22,7 +22,7 @@ else:
   logging.basicConfig(level=logging.INFO)
 
 
-DESTINATION_DATABASE_NAME = os.environ['IcebergeDatabaseName']
+DESTINATION_DATABASE_NAME = os.environ['IcebergDatabaseName']
 DESTINATION_TABLE_NAME = os.environ['IcebergTableName']
 DESTINATION_TABLE_UNIQUE_KEYS = os.environ.get('IcebergTableUniqueKeys', None)
 
