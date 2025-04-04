@@ -44,7 +44,7 @@ class FirehoseDataProcLambdaStack(Stack):
       description="Transform records to Apache Iceberg table",
       code=aws_lambda.Code.from_asset(os.path.join(os.path.dirname(__file__), '../src/main/python/IcebergTransformer')),
       environment={
-        "IcebergeDatabaseName": dest_iceberg_table_config["database_name"],
+        "IcebergDatabaseName": dest_iceberg_table_config["database_name"],
         "IcebergTableName": dest_iceberg_table_config["table_name"],
         "IcebergTableUniqueKeys": dest_iceberg_table_unique_keys
       },
